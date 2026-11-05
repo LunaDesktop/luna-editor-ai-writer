@@ -25,6 +25,20 @@ DEFAULT_MODELS = {
     "ollama": "llama3.2",
 }
 
+# Etykiety z manifestu → identyfikatory używane w kodzie.
+PROVIDERS = {
+    "gemini": "gemini",
+    "chatgpt (openai)": "openai",
+    "openai": "openai",
+    "claude (anthropic)": "anthropic",
+    "anthropic": "anthropic",
+    "deepseek": "deepseek",
+    "openrouter": "openrouter",
+    "mistral": "mistral",
+    "groq": "groq",
+    "ollama": "ollama",
+}
+
 SYSTEM_PROMPT = (
     "Jesteś asystentem pisarskim w edytorze tekstu Luna. "
     "Odpowiadaj w języku tekstu lub instrukcji użytkownika. "
@@ -193,7 +207,8 @@ def main():
     action = setting("LUNA_PLUGIN_ACTION")
     instruction = setting("LUNA_PLUGIN_INSTRUCTION")
     language = setting("LUNA_PLUGIN_LANGUAGE", "text")
-    provider = setting("LUNA_SETTING_PROVIDER", "gemini").lower()
+    provider = setting("LUNA_SETTING_PROVIDER", "Gemini").lower()
+    provider = PROVIDERS.get(provider, provider)
     model = setting("LUNA_SETTING_MODEL") or DEFAULT_MODELS.get(provider, "")
     key = setting("LUNA_SETTING_API_KEY")
 
