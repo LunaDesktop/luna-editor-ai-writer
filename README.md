@@ -23,8 +23,14 @@ archiwum z GitHuba.
 | Pole | Opis |
 |---|---|
 | Dostawca LLM | `Gemini`, `ChatGPT (OpenAI)`, `Claude (Anthropic)`, `DeepSeek`, `OpenRouter`, `Mistral`, `Groq`, `Ollama` |
-| Model | np. `gemini-2.0-flash`, `gpt-4o-mini`, `claude-3-5-sonnet-latest`, `deepseek-chat` |
+| Model | **lista pobierana z API** po kliknięciu — wybór z popupu z wyszukiwaniem |
 | Klucz API | klucz wybranego dostawcy (dla `Ollama` nie jest wymagany) |
+
+Po wpisaniu klucza kliknij pole **Model** — wtyczka pobierze listę modeli
+dostępnych dla tego klucza i pokaże ją w wyszukiwanym popupie. Lista jest
+odświeżana po zmianie klucza lub dostawcy.
+
+Domyślne modele (gdy dostawca nie zwróci listy):
 
 Klucz jest zapisywany **lokalnie** w
 `~/.config/luna/editor/plugins/ai-writer.conf` z prawami `0600` i wysyłany
@@ -47,6 +53,7 @@ Domyślne modele:
 
 | Polecenie | Kontekst | Wynik |
 |---|---|---|
+| **Zapytaj AI…** | cały dokument | odpowiada na wpisane pytanie/polecenie w miejscu kursora |
 | **Napisz tekst…** | cały dokument | wstawia wygenerowaną treść w miejscu kursora |
 | **Kontynuuj pisanie** | cały dokument | dopisuje dalszy ciąg w miejscu kursora |
 | **Popraw zaznaczenie** | zaznaczenie | zamienia zaznaczenie poprawioną wersją |
