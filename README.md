@@ -1,9 +1,10 @@
 # AI Writer — wtyczka do Luna Editor
 
 Agent AI dla Edytora Luny: pisze nowe treści, kontynuuje dokument, poprawia
-i streszcza zaznaczenie oraz tłumaczy tekst. Obsługuje Gemini, OpenAI
-(ChatGPT), Anthropic (Claude), DeepSeek, OpenRouter, Mistral, Groq oraz lokalny
-Ollama.
+i streszcza zaznaczenie oraz tłumaczy tekst. Ma też **panel czatu z agentem**,
+który widzi projekt i potrafi czytać oraz zapisywać pliki. Obsługuje Gemini,
+OpenAI (ChatGPT), Anthropic (Claude), DeepSeek, OpenRouter, Mistral, Groq oraz
+lokalny Ollama.
 
 ## Instalacja
 
@@ -62,6 +63,31 @@ Po instalacji polecenia są dostępne w **menu głównym Edytora** (sekcja
 | **Popraw zaznaczenie** | zaznaczenie | zamienia zaznaczenie poprawioną wersją |
 | **Przetłumacz zaznaczenie…** | zaznaczenie | zamienia zaznaczenie tłumaczeniem |
 | **Streść zaznaczenie** | zaznaczenie | wstawia streszczenie |
+
+## Czat z agentem
+
+Wtyczka deklaruje `chat = true`, więc w Edytorze pojawia się **panel czatu**
+(ikona czatu w nagłówku, `Ctrl+Shift+A`). To tryb agenta: model widzi strukturę
+projektu, treść małych plików i aktywny dokument, a w rozmowie może używać
+narzędzi:
+
+| Narzędzie | Do czego |
+|---|---|
+| `read_file` | przeczytanie pliku |
+| `list_dir` | lista zawartości katalogu |
+| `search` | szukanie tekstu w projekcie |
+| `write_file` | zapis całego pliku |
+| `create_file` | nowy plik (błąd, gdy istnieje) |
+| `delete_file` | usunięcie pliku |
+
+Edytor wykonuje narzędzia i wraca do modelu z wynikami (do 6 kroków na turę),
+więc zadania typu „dodaj testy do `src/main.rs`” albo „popraw literówki w
+README” dzieją się na prawdziwych plikach. Zapis do pliku z niezapisanymi
+zmianami jest odrzucany, a wszystkie ścieżki muszą mieścić się w katalogu
+projektu.
+
+Model jest proszony o odpowiedź w JSON-ie (`{"text": …, "tool_calls": […]}`),
+ale zwykła odpowiedź tekstowa też działa — wtedy kończy turę.
 
 ## Jak to działa
 
