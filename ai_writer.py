@@ -73,6 +73,66 @@ def request_json(url, payload, headers, provider):
         fail(f"{provider}: {error}")
 
 
+def request_get(url, headers, provider):
+    request = urllib.request.Request(url, headers=headers, method="GET")
+    try:
+        with urllib.request.urlopen(request, timeout=60) as response:
+            return json.load(response)
+    except urllib.error.HTTPError as error:
+        detail = error.read().decode("utf-8", "replace")[:600]
+        fail(f"{provider}: HTTP {error.code}: {detail}")
+    except Exception as error:  # noqa: BLE001
+        fail(f"{provider}: {error}")
+
+
+def list_models(provider, key):
+    """Zwraca listę identyfikatorów modeli dostępnych dla klucza."""
+    if provider == "ollama":
+        data = request_get("http://localhost:11434/api/tags", {}, provider)
+        return [model.get("name", "") for model in data.get("models", [])]
+
+    if provider == "gemini":
+        data = request_get(
+            "https://generativelanguage.googleapis.com/v1beta/models"
+            f"?key={key}",
+            {},
+            provider,
+        )
+        return [
+            model.get("name", "").removeprefix("models/")
+            for model in data.get("models", [])
+            if "generateContent" in model.get("supportedGenerationMethods", [])
+        ]
+
+    if provider == "anthropic":
+        data = request_get(
+            "https://api.anthropic.com/v1/models",
+            {
+                "x-api-key": key,
+                "anthropic-version": "2023-06-01",
+            },
+            provider,
+        )
+        return [model.get("id", "") for model in data.get("data", [])]
+
+    endpoints = {
+        "openai": "https://api.openai.com/v1/models",
+        "deepseek": "https://api.deepseek.com/models",
+        "openrouter": "https://openrouter.ai/api/v1/models",
+        "mistral": "https://api.mistral.ai/v1/models",
+        "groq": "https://api.groq.com/openai/v1/models",
+    }
+    headers = {"Content-Type": "application/json"}
+    if key:
+        headers["Authorization"] = f"Bearer {key}"
+    data = request_get(endpoints[provider], headers, provider)
+    models = [model.get("id", "") for model in data.get("data", [])]
+    if provider == "openai":
+        prefixes = ("gpt-", "o1", "o3", "o4", "chatgpt")
+        models = [model for model in models if model.startswith(prefixes)]
+    return models
+
+
 def openai_compatible(url, key, model, user, provider):
     headers = {
         "Content-Type": "application/json",
@@ -160,6 +220,14 @@ def build_prompt(action, instruction, payload, language):
         else:
             payload = payload[:12000] + "\n…"
 
+    if action == "ask":
+        if not instruction:
+            fail("Wpisz pytanie albo polecenie dla modelu.")
+        return (
+            "Odpowiedz na poniższe pytanie/polecenie użytkownika "
+            f"(język: {language}). Zwróć tylko odpowiedź, bez komentarzy:\n"
+            f"{instruction}\n\nKontekst dokumentu:\n---\n{payload}\n---"
+        )
     if action == "write":
         if not instruction:
             fail("Napisz, co mam wygenerować (pole instrukcji jest puste).")
@@ -205,22 +273,31 @@ def clean(text):
 
 def main():
     action = setting("LUNA_PLUGIN_ACTION")
-    instruction = setting("LUNA_PLUGIN_INSTRUCTION")
     language = setting("LUNA_PLUGIN_LANGUAGE", "text")
     provider = setting("LUNA_SETTING_PROVIDER", "Gemini").lower()
     provider = PROVIDERS.get(provider, provider)
-    model = setting("LUNA_SETTING_MODEL") or DEFAULT_MODELS.get(provider, "")
     key = setting("LUNA_SETTING_API_KEY")
 
     if provider not in DEFAULT_MODELS:
         fail(f"Nieznany dostawca LLM: {provider}")
-    if not model:
-        model = DEFAULT_MODELS[provider]
     if provider != "ollama" and not key:
         fail(
             "Brak klucza API. Otwórz Plugins → AI Writer → Settings "
             "i wpisz klucz wybranego dostawcy."
         )
+
+    if action == "__list_models__":
+        models = [model for model in list_models(provider, key) if model]
+        if not models:
+            fail("Dostawca nie zwrócił listy modeli.")
+        for model in sorted(set(models), key=str.lower):
+            print(model)
+        return
+
+    instruction = setting("LUNA_PLUGIN_INSTRUCTION")
+    model = setting("LUNA_SETTING_MODEL") or DEFAULT_MODELS.get(provider, "")
+    if not model:
+        model = DEFAULT_MODELS[provider]
 
     user = build_prompt(action, instruction, read_context(), language)
 
