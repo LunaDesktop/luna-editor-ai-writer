@@ -22,9 +22,9 @@ archiwum z GitHuba.
 
 | Pole | Opis |
 |---|---|
-| Dostawca LLM | `gemini`, `openai`, `anthropic`, `deepseek`, `openrouter`, `mistral`, `groq`, `ollama` |
+| Dostawca LLM | `Gemini`, `ChatGPT (OpenAI)`, `Claude (Anthropic)`, `DeepSeek`, `OpenRouter`, `Mistral`, `Groq`, `Ollama` |
 | Model | np. `gemini-2.0-flash`, `gpt-4o-mini`, `claude-3-5-sonnet-latest`, `deepseek-chat` |
-| Klucz API | klucz wybranego dostawcy (dla `ollama` nie jest wymagany) |
+| Klucz API | klucz wybranego dostawcy (dla `Ollama` nie jest wymagany) |
 
 Klucz jest zapisywany **lokalnie** w
 `~/.config/luna/editor/plugins/ai-writer.conf` z prawami `0600` i wysyłany
