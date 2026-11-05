@@ -51,6 +51,9 @@ Domyślne modele:
 
 ## Polecenia
 
+Po instalacji polecenia są dostępne w **menu głównym Edytora** (sekcja
+„AI Writer”) oraz w menedżerze **Plugins…**.
+
 | Polecenie | Kontekst | Wynik |
 |---|---|---|
 | **Zapytaj AI…** | cały dokument | odpowiada na wpisane pytanie/polecenie w miejscu kursora |
